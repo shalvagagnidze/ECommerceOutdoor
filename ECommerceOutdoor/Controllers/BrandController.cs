@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Features.Commands.BrandCommands;
+using ServiceLayer.Features.Commands.ImageCommands;
 using ServiceLayer.Features.Queries.BrandQueries;
 using ServiceLayer.Models;
 
@@ -62,6 +63,26 @@ public class BrandController : ApiControllerBase
         return Ok("Brand updated successfully!");
     }
 
+    [HttpPost("images")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(401)]
+    [Authorize(Roles = "Admin,Moderator")]
+    public async Task<IActionResult> UploadImage([FromForm] UploadImageCommand command)
+    {
+        try
+        {
+            var modifiedCommand = command with { IsBrand = true };
+
+            var imageUrls = await Mediator.Send(modifiedCommand);
+
+            return Ok(imageUrls);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
     [HttpPut("delete-brand")]
     [ProducesResponseType(200)]
     [Authorize(Roles = "Admin")]
@@ -80,5 +101,16 @@ public class BrandController : ApiControllerBase
         await Mediator.Send(new DeleteBrandByIdCommand(id));
 
         return Ok($"Brand with Id:{id} deleted successfully!");
+    }
+
+    [HttpDelete("delete-image-{key}-by-brand-{id}")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(401)]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteImage(Guid id, string key)
+    {
+        await Mediator.Send(new DeleteImageCommand(id, key, true));
+
+        return Ok("Image deleted successfully!");
     }
 }

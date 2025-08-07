@@ -8,5 +8,5 @@ using System.Threading.Tasks;
 
 namespace ServiceLayer.Features.Commands.ImageCommands
 {
-    public record UploadImageCommand(Guid productId,List<IFormFile> files) : IRequest<List<string>>;
+    public record UploadImageCommand(Guid productId,List<IFormFile> files,bool IsBrand = false) : IRequest<List<string>>;
 }

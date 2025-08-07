@@ -105,6 +105,7 @@ public class ProductController() : ApiControllerBase
     {
         try
         {
+            var modifiedCommand = command with { IsBrand = false };
             var imageUrls = await Mediator.Send(command);
 
             return Ok(imageUrls);
@@ -175,7 +176,7 @@ public class ProductController() : ApiControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteImage(Guid id,string key)
     {
-        await Mediator.Send(new DeleteImageCommand(id,key));
+        await Mediator.Send(new DeleteImageCommand(id,key,false));
 
         return Ok("Image deleted successfully!");
     }

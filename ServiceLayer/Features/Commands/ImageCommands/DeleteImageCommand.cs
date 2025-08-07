@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 
 namespace ServiceLayer.Features.Commands.ImageCommands
 {
-    public record DeleteImageCommand(Guid productId, string key) : IRequest;
+    public record DeleteImageCommand(Guid productId, string key,bool IsBrand) : IRequest;
 }

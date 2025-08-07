@@ -1,5 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
+using DomainLayer.Entities;
+using DomainLayer.Entities.Products;
 using DomainLayer.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Options;
@@ -26,9 +28,30 @@ namespace ServiceLayer.Features.CommandHandlers.ImageHandlers
         }
         public async Task Handle(DeleteImageCommand request, CancellationToken cancellationToken)
         {
-            var product = await _unitOfWork.ProductRepository.GetByIdAsync(request.productId);
+            Product product = new Product();
+            Brand brand = new Brand();
+            string? image = "";
+            if(request.IsBrand)
+            {
+                brand = await _unitOfWork.BrandRepository.GetByIdAsync(request.productId);
+                if (brand is null)
+                {
+                    throw new Exception("Brand not found.");
+                }
 
-            var image = product.Images?.FirstOrDefault(x => x.Contains(request.key));
+                image = brand.Images?.FirstOrDefault(x => x.Contains(request.key));
+            }
+            else
+            {
+                product = await _unitOfWork.ProductRepository.GetByIdAsync(request.productId);
+                if (product is null)
+                {
+                    throw new Exception("Product not found.");
+                }
+
+                image = product.Images?.FirstOrDefault(x => x.Contains(request.key));
+            }
+                
 
             var getRequest = new DeleteObjectRequest
             {
@@ -38,7 +61,14 @@ namespace ServiceLayer.Features.CommandHandlers.ImageHandlers
 
             var a = await _s3.DeleteObjectAsync(getRequest,cancellationToken);
 
-            product.Images?.Remove(image!);
+            if (request.IsBrand)
+            {
+                brand.Images?.Remove(image!);
+            }
+            else
+            {
+                product.Images?.Remove(image!);
+            }
 
             await _unitOfWork.SaveAsync();
         }

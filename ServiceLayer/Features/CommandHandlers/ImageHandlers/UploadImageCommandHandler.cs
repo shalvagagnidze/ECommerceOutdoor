@@ -1,5 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
+using DomainLayer.Entities;
+using DomainLayer.Entities.Products;
 using DomainLayer.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -30,12 +32,26 @@ namespace ServiceLayer.Features.CommandHandlers.ImageHandlers
         }
         public async Task<List<string>> Handle(UploadImageCommand request, CancellationToken cancellationToken)
         {
-            var product = await _unitOfWork.ProductRepository.GetByIdAsync(request.productId);
-
-            if (product is null)
+            Brand brand = new Brand();
+            Product product = new Product();
+            if (request.IsBrand)
             {
-                throw new Exception("Product not found.");
+                brand = await _unitOfWork.BrandRepository.GetByIdAsync(request.productId);
+                if (brand is null)
+                {
+                    throw new Exception("Brand not found.");
+                }
             }
+            else
+            {
+                product = await _unitOfWork.ProductRepository.GetByIdAsync(request.productId);
+
+                if (product is null)
+                {
+                    throw new Exception("Product not found.");
+                }
+            }
+
 
             var imageUrls = new List<string>();
 
@@ -46,7 +62,16 @@ namespace ServiceLayer.Features.CommandHandlers.ImageHandlers
                     throw new ArgumentException("File size should not exceed 4 MB");
                 }
 
-                var key = $"images/{product.Id}/{Guid.NewGuid()}";
+                string key = "";
+
+                if (request.IsBrand)
+                {
+                    key = $"brands/{brand.Id}/{Guid.NewGuid()}";
+                }
+                else
+                {
+                    key = $"images/{product.Id}/{Guid.NewGuid()}";
+                }
 
                 using var stream = file.OpenReadStream();
 
@@ -65,9 +90,18 @@ namespace ServiceLayer.Features.CommandHandlers.ImageHandlers
                 imageUrls.Add(imageUrl);
             }
 
-            product.Images = product.Images != null
-            ? product.Images.Concat(imageUrls).ToList()
-            : imageUrls;
+            if (request.IsBrand)
+            {
+                brand.Images = brand.Images != null
+                ? brand.Images.Concat(imageUrls).ToList()
+                : imageUrls;
+            }
+            else
+            {
+                product.Images = product.Images != null
+               ? product.Images.Concat(imageUrls).ToList()
+               : imageUrls;
+            }
 
             await _unitOfWork.SaveAsync();
 

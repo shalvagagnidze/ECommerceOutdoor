@@ -11,6 +11,7 @@ public class Brand : BaseEntity
     public DateTime CreateDate { get; set; }
     public DateTime DeleteTime { get; set; }
     public bool IsDeleted { get; set; }
+    public List<string>? Images { get; set; }
     public void DeleteBrand()
     {
         IsDeleted = true;
