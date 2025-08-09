@@ -23,7 +23,8 @@ public class UpdateBrandCommandHandler : IRequestHandler<UpdateBrandCommand, Uni
         existingBrand.Name = request.model.Name;
         existingBrand.Origin = request.model.Origin;
         existingBrand.Description = request.model.Description;
-        
+        existingBrand.Images = request.model.Images;
+
         _unitOfWork.BrandRepository.Update(existingBrand);
         await _unitOfWork.SaveAsync();
 

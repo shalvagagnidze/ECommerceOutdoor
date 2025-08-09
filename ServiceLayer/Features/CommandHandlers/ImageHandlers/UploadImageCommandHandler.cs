@@ -66,7 +66,7 @@ namespace ServiceLayer.Features.CommandHandlers.ImageHandlers
 
                 if (request.IsBrand)
                 {
-                    key = $"brands/{brand.Id}/{Guid.NewGuid()}";
+                    key = $"images/{brand.Id}/{Guid.NewGuid()}";
                 }
                 else
                 {
