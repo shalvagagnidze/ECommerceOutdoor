@@ -13,7 +13,8 @@ public static class DependencyInjection
         services.AddDbContext<ECommerceDbContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString("ECommerceOutdoor"));
-        });
+        },
+        ServiceLifetime.Scoped);
 
         services.AddTransient<IUnitOfWork, UnitOfWork>();
 

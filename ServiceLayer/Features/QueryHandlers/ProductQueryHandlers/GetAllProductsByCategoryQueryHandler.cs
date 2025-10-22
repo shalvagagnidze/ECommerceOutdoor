@@ -43,7 +43,7 @@ public class GetAllProductsByCategoryQueryHandler : IRequestHandler<GetAllProduc
 
         var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.categoryId);
 
-        var filtered = models.Where(prod => prod.Category == category);
+        var filtered = models.Where(prod => prod.Category?.Id == category.Id);
 
         var products = _mapper.Map<IEnumerable<ProductModel>>(models);
 

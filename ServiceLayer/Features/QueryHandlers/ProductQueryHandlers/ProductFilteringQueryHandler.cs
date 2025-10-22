@@ -22,7 +22,9 @@ public class ProductFilteringQueryHandler : IRequestHandler<ProductFilteringQuer
     }
     public async Task<PagedList<ProductModel>> Handle(ProductFilteringQuery request, CancellationToken cancellationToken)
     {
-        IQueryable<Product> products = _dbSet;
+        IQueryable<Product> products = _dbSet.AsNoTracking()
+                                             .Include(x => x.Category).Include(x => x.Brand).Where(p => !p.isDeleted);
+        //IQueryable<Product> products = _dbSet.AsNoTracking().Where(p => !p.isDeleted);
 
         if (request.filter.BrandIds!.Any())
         {
@@ -81,6 +83,7 @@ public class ProductFilteringQueryHandler : IRequestHandler<ProductFilteringQuer
             }).ToList(),
             Images = b.Images
         });
+
 
         var productsQuery = await PagedList<ProductModel>.CreateAsync(productModelsQuery, request.Page, request.PageSize);
 
