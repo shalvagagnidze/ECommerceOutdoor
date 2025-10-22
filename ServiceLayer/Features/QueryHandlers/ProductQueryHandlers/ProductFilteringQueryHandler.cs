@@ -23,7 +23,7 @@ public class ProductFilteringQueryHandler : IRequestHandler<ProductFilteringQuer
     public async Task<PagedList<ProductModel>> Handle(ProductFilteringQuery request, CancellationToken cancellationToken)
     {
         IQueryable<Product> products = _dbSet.AsNoTracking()
-                                             .Include(x => x.Category).Include(x => x.Brand).Where(p => !p.isDeleted);
+                                             .Include(x => x.Category).Include(x => x.Brand);
         //IQueryable<Product> products = _dbSet.AsNoTracking().Where(p => !p.isDeleted);
 
         if (request.filter.BrandIds!.Any())
@@ -35,8 +35,12 @@ public class ProductFilteringQueryHandler : IRequestHandler<ProductFilteringQuer
         {
             var categoryIds = request.filter.CategoryIds;
 
-            products = products.Where(x => categoryIds.Contains(x.Category!.Id) ||
-                                           categoryIds.Contains(x.Category!.ParentId!.Value));
+            //products = products.Where(x => categoryIds.Contains(x.Category!.Id) ||
+            //                               categoryIds.Contains(x.Category!.ParentId!.Value));
+            products = products.Where(x =>
+                                        categoryIds.Contains(x.Category!.Id) ||
+                                        (x.Category!.ParentId.HasValue && categoryIds.Contains(x.Category.ParentId.Value)));
+
         }
 
 
