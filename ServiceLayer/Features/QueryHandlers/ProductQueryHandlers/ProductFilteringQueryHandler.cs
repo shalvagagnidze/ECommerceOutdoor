@@ -38,8 +38,10 @@ public class ProductFilteringQueryHandler : IRequestHandler<ProductFilteringQuer
             //products = products.Where(x => categoryIds.Contains(x.Category!.Id) ||
             //                               categoryIds.Contains(x.Category!.ParentId!.Value));
             products = products.Where(x =>
-                                        categoryIds.Contains(x.Category!.Id) ||
-                                        (x.Category!.ParentId.HasValue && categoryIds.Contains(x.Category.ParentId.Value)));
+                (x.Category != null && categoryIds!.Contains(x.Category.Id)) ||
+                (x.Category != null && x.Category.ParentId.HasValue && categoryIds!.Contains(x.Category.ParentId.Value))
+            );
+
 
         }
 
@@ -67,7 +69,7 @@ public class ProductFilteringQueryHandler : IRequestHandler<ProductFilteringQuer
         if (request.filter.FacetFilters != null && request.filter.FacetFilters.Any())
         {
             var facetValueIds = request.filter.FacetFilters.Select(ff => ff.facetValueId).ToList();
-            products = products.Where(x => x.ProductFacetValues
+            products = products.Where(x => x.ProductFacetValues!
                                              .Any(f => facetValueIds.Contains(f.FacetValueId)));
         }
 
@@ -79,9 +81,9 @@ public class ProductFilteringQueryHandler : IRequestHandler<ProductFilteringQuer
             Status = b.Status,
             Condition = b.Condition,
             Description = b.Description,
-            CategoryId = b.Category!.Id,
-            BrandId = b.Brand!.Id,
-            ProductFacetValues = b.ProductFacetValues.Select(pfv => new ProductFacetValueModel 
+            CategoryId = b.Category != null ? b.Category.Id : Guid.Empty,
+            BrandId = b.Brand != null ? b.Brand.Id : Guid.Empty,
+            ProductFacetValues = b.ProductFacetValues!.Select(pfv => new ProductFacetValueModel 
             { Id = pfv.Id, 
               FacetValueId = pfv.FacetValueId 
             }).ToList(),
