@@ -8,6 +8,7 @@ namespace ServiceLayer.Models
 {
     public class FacetFilterModel
     {
+        public Guid FacetId { get; set; }
         public Guid facetValueId { get; set; }
     }
 }
